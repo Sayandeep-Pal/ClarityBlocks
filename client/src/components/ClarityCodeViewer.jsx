@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-const API_BASE =  "http://localhost:5000";
+const API_BASE =  "https://clarityblocks.onrender.com";
 
 const ClarityCodeViewer = ({ code, contractName = "my-contract" }) => {
   const [validation, setValidation] = useState(null);
