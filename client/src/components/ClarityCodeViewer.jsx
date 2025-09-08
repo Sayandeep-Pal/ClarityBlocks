@@ -161,7 +161,7 @@ const ClarityCodeViewer = ({ code, contractName = "my-contract" }) => {
               {validation && (
                 <div className="mb-4">
                   <h4 className="font-semibold text-white mb-2">Validation:</h4>
-                  {validation.errors.length > 1 && (
+                  {validation.errors.length > 0 && (
                     <div className="mb-2">
                       <p className="text-red-400 font-medium">Errors:</p>
                       <ul className="list-disc list-inside text-red-400 text-xs">
@@ -181,7 +181,7 @@ const ClarityCodeViewer = ({ code, contractName = "my-contract" }) => {
                       </ul>
                     </div>
                   )}
-                  {validation.warnings.length === 0 && (
+                  { validation.warnings.length === 0 && (
                     <p className="text-green-400">✓ Validation passed</p>
                   )}
                 </div>
