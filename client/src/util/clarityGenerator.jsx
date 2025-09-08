@@ -10,7 +10,6 @@ const generateClarityCode = (nodes, edges) => {
   const functions = [];
 
   // Sort nodes to ensure a somewhat logical order (e.g., module first, then declarations)
-  // This is a simplistic sort. A proper builder would build an AST.
   nodes.sort((a, b) => {
     if (a.type === 'module') return -1;
     if (b.type === 'module') return 1;
@@ -27,7 +26,7 @@ const generateClarityCode = (nodes, edges) => {
   const generateFunctionBody = (startNodeId) => {
     let bodyCode = [];
     let currentNodeId = startNodeId;
-    let processedNodes = new Set(); // To prevent infinite loops in cycles or complex graphs
+    let processedNodes = new Set();
 
     while (currentNodeId && !processedNodes.has(currentNodeId)) {
       processedNodes.add(currentNodeId);
@@ -38,51 +37,69 @@ const generateClarityCode = (nodes, edges) => {
         case 'letBinding': {
           const varName = currentNode.data.varName || 'my-local-var';
           const valueExpr = currentNode.data.valueExpr || 'u0';
+          
+          // Find what comes after the let binding
+          const nextNodes = getConnectedNodes(currentNode.id, 'out', 'out');
+          let letBody = [];
+          if (nextNodes.length > 0) {
+            letBody = generateFunctionBody(nextNodes[0].id);
+          } else {
+            letBody.push(`      (ok true)`);
+          }
+          
           bodyCode.push(`    (let ((${varName} ${valueExpr}))`);
-          bodyCode.push(`      ;; Next expressions in this let scope`);
-          // For now, let's assume `let` is the final statement or its children are nested
-          // A real implementation would need to handle nested let scopes.
-          // For sequential flow, we just generate the let and then proceed.
-          break; // Don't continue for nested 'let' in this simple generator
+          bodyCode = bodyCode.concat(letBody.map(line => `  ${line}`));
+          bodyCode.push(`    )`);
+          currentNodeId = null; // Let handles its own body
+          break;
         }
         case 'ifElseCondition': {
           const condition = currentNode.data.condition || 'true';
           bodyCode.push(`    (if ${condition}`);
-          // Connect to 'then' branch
+          
+          // Handle 'then' branch
           const thenNodes = getConnectedNodes(currentNode.id, 'out', 'then');
           if (thenNodes.length > 0) {
-            bodyCode.push(`      (begin`);
-            bodyCode.push(generateFunctionBody(thenNodes[0].id).map(line => `        ${line}`).join('\n'));
-            bodyCode.push(`      )`);
+            const thenBody = generateFunctionBody(thenNodes[0].id);
+            if (thenBody.length === 1) {
+              bodyCode.push(`      ${thenBody[0].trim()}`);
+            } else {
+              bodyCode.push(`      (begin`);
+              bodyCode = bodyCode.concat(thenBody.map(line => `    ${line}`));
+              bodyCode.push(`      )`);
+            }
           } else {
-            bodyCode.push(`      (ok true)`); // Default then branch
+            bodyCode.push(`      (ok true)`);
           }
 
-          // Connect to 'else' branch
+          // Handle 'else' branch
           const elseNodes = getConnectedNodes(currentNode.id, 'out', 'else');
           if (elseNodes.length > 0) {
-            bodyCode.push(`      (begin`);
-            bodyCode.push(generateFunctionBody(elseNodes[0].id).map(line => `        ${line}`).join('\n'));
-            bodyCode.push(`      )`);
+            const elseBody = generateFunctionBody(elseNodes[0].id);
+            if (elseBody.length === 1) {
+              bodyCode.push(`      ${elseBody[0].trim()}`);
+            } else {
+              bodyCode.push(`      (begin`);
+              bodyCode = bodyCode.concat(elseBody.map(line => `    ${line}`));
+              bodyCode.push(`      )`);
+            }
           } else {
-            bodyCode.push(`      (ok false)`); // Default else branch
+            bodyCode.push(`      (ok false)`);
           }
           bodyCode.push(`    )`);
-          // After if-else, the flow merges. This generator doesn't handle merges easily.
-          // We'll stop further traversal for simplicity here to avoid generating duplicate code or incorrect sequences.
-          currentNodeId = null; // Stop after if-else to prevent linear continuation
+          currentNodeId = null;
           break;
         }
         case 'returnOk': {
           const value = currentNode.data.value || 'true';
           bodyCode.push(`    (ok ${value})`);
-          currentNodeId = null; // Return statements usually end the function flow
+          currentNodeId = null;
           break;
         }
         case 'returnErr': {
           const errorCode = currentNode.data.errorCode || 'u100';
           bodyCode.push(`    (err ${errorCode})`);
-          currentNodeId = null; // Return statements usually end the function flow
+          currentNodeId = null;
           break;
         }
         case 'assert': {
@@ -112,20 +129,21 @@ const generateClarityCode = (nodes, edges) => {
           const mapName = currentNode.data.mapName || 'my-map';
           const key = currentNode.data.key || 'u1';
           const value = currentNode.data.value || 'true';
-          bodyCode.push(`    (map-set! ${mapName} { id: ${key} } { value: ${value} })`);
+          bodyCode.push(`    (map-set ${mapName} { id: ${key} } { value: ${value} })`);
           break;
         }
         case 'mapDelete': {
           const mapName = currentNode.data.mapName || 'my-map';
           const key = currentNode.data.key || 'u1';
-          bodyCode.push(`    (map-delete! ${mapName} { id: ${key} })`);
+          bodyCode.push(`    (map-delete ${mapName} { id: ${key} })`);
           break;
         }
         case 'contractCall': {
           const contractId = currentNode.data.contractId || '.some-contract';
           const functionName = currentNode.data.functionName || 'some-function';
-          const args = currentNode.data.args || ''; // e.g., 'u100 true'
-          bodyCode.push(`    (contract-call? ${contractId} ${functionName} ${args})`);
+          const args = currentNode.data.args || '';
+          const argsStr = args ? ` ${args}` : '';
+          bodyCode.push(`    (contract-call? ${contractId} ${functionName}${argsStr})`);
           break;
         }
         default:
@@ -134,21 +152,20 @@ const generateClarityCode = (nodes, edges) => {
       }
 
       // Find the next node in the sequence
-      const nextNodes = getConnectedNodes(currentNode.id, 'out', 'out'); // Standard output handle
+      const nextNodes = getConnectedNodes(currentNode.id, 'out', 'out');
       currentNodeId = nextNodes.length > 0 ? nextNodes[0].id : null;
     }
     return bodyCode;
   };
 
-  let moduleName = "my-contract"; // Default
-  let contractName = "my-module"; // Default
+  let moduleName = "my-contract";
+  let contractName = "my-module";
 
   const moduleNode = nodes.find(n => n.type === 'module');
   if (moduleNode) {
     moduleName = moduleNode.data.moduleName || moduleName;
     contractName = moduleNode.data.contractName || contractName;
 
-    // Collect global declarations and function entry points directly connected to the module
     const moduleOutNodes = getConnectedNodes(moduleNode.id, 'out');
 
     moduleOutNodes.forEach(node => {
@@ -159,8 +176,7 @@ const generateClarityCode = (nodes, edges) => {
           break;
         }
         case 'constant': {
-          const name = node.data.name || 'MY_CONSTANT';
-          const type = node.data.type || 'uint';
+          const name = node.data.name || 'MY-CONSTANT';
           const value = node.data.value || 'u100';
           globalDeclarations.push(`(define-constant ${name} ${value})`);
           break;
@@ -185,36 +201,59 @@ const generateClarityCode = (nodes, edges) => {
           const funcKeyword = node.type === 'publicFunction' ? 'define-public' :
                               node.type === 'readOnlyFunction' ? 'define-read-only' :
                               'define-private';
-          const funcName = node.data.name || (funcKeyword === 'define-public' ? 'my-public-function' : funcKeyword === 'define-read-only' ? 'my-read-only-function' : 'my-private-function');
+          const funcName = node.data.name || 'my-function';
           const funcParams = node.data.params || '';
-          const returnType = node.data.returnType || '(response bool uint)'; // Public/Private
-          let functionSignature = `(${funcName} (${funcParams}))`;
-
-          if (funcKeyword === 'define-read-only') {
-              // Read-only functions don't usually specify (response ...) explicitly in signature, but in their body return.
-              // For simplicity, we'll keep it as a comment if returnType is provided, or omit.
-          } else {
-              functionSignature += ` ${returnType}`;
+          
+          // Build parameter list
+          let paramString = '';
+          if (funcParams.trim()) {
+            // Assume params are formatted as "param1 uint, param2 bool"
+            const params = funcParams.split(',').map(p => p.trim());
+            const formattedParams = params.map(param => {
+              const parts = param.split(' ');
+              if (parts.length >= 2) {
+                const paramName = parts[0];
+                const paramType = parts[1];
+                return `(${paramName} ${paramType})`;
+              }
+              return `(${param} uint)`;
+            });
+            paramString = formattedParams.join(' ');
           }
 
-
-          // Find the first logic node connected to the function's output handle
+          // Find the function body
           const funcBodyStartNodes = getConnectedNodes(node.id, 'out', 'out');
           let funcBody = [];
           if (funcBodyStartNodes.length > 0) {
             funcBody = generateFunctionBody(funcBodyStartNodes[0].id);
           } else {
-            funcBody.push(`    ;; Function body goes here`);
-            funcBody.push(`    (ok true)`); // Default return
+            if (funcKeyword === 'define-read-only') {
+              funcBody.push(`    u0`); // Default read-only return
+            } else {
+              funcBody.push(`    (ok true)`); // Default public/private return
+            }
           }
 
-          functions.push(
-            `(${funcKeyword} ${functionSignature}\n` +
-            `  (begin\n` +
-            (funcBody.length > 0 ? funcBody.join('\n') : `    ;; Empty function body\n    (ok true)`) + '\n' +
-            `  )\n` +
-            `)`
-          );
+          // Build function signature
+          let functionDef;
+          if (funcKeyword === 'define-read-only') {
+            functionDef = `(${funcKeyword} (${funcName}${paramString ? ' ' + paramString : ''})`;
+          } else {
+            functionDef = `(${funcKeyword} (${funcName}${paramString ? ' ' + paramString : ''})`;
+          }
+
+          // Wrap body appropriately
+          if (funcBody.length === 1) {
+            functions.push(`${functionDef}\n  ${funcBody[0].trim()}\n)`);
+          } else {
+            functions.push(
+              `${functionDef}\n` +
+              `  (begin\n` +
+              funcBody.join('\n') + '\n' +
+              `  )\n` +
+              `)`
+            );
+          }
           break;
         }
         default:
@@ -227,19 +266,22 @@ const generateClarityCode = (nodes, edges) => {
     return code.join('\n');
   }
 
-  // code.push(`(define-contract ${contractName})`); // This is more common now for top-level module definition
-  // code.push(``);
-  // code.push(`(define-module ${moduleName}`);
-  // code.push(`  (read-only-data)`);
-  // code.push(`  (on-chain-data)`);
-  // code.push(`)`);
-  // code.push(``);
+  // Add contract header comment
+  if (contractName !== "my-module") {
+    code.push(`;; ${contractName} Smart Contract`);
+    code.push('');
+  }
 
-  code = code.concat(globalDeclarations.map(line => line));
-  code.push(``);
-  code = code.concat(functions.map(func => func));
+  // Add global declarations
+  if (globalDeclarations.length > 0) {
+    code = code.concat(globalDeclarations);
+    code.push('');
+  }
 
-  return code.join('\n\n'); // Add extra newlines between major sections
+  // Add functions
+  code = code.concat(functions);
+
+  return code.join('\n');
 };
 
 export default generateClarityCode;
