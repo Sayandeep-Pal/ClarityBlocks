@@ -47,13 +47,13 @@ const LetVariableNode = ({ data }) => {
         type="target"
         position={Position.Left}
         id="d"
-        className="w- 8 h-8 rounded-full bg-purple-300 border-2 border-purple-700"
+        className="w-18 h-18 rounded-full bg-purple-300 border-2 border-purple-700"
       />
       <Handle
         type="source"
         position={Position.Right}
         id="e"
-        className="w- 8 h-8 rounded-full bg-purple-300 border-2 border-purple-700"
+        className="w-18 h-18 rounded-full bg-purple-300 border-2 border-purple-700"
       />
     </div>
   );

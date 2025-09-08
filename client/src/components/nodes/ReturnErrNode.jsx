@@ -39,7 +39,7 @@ const ReturnErrNode = ({ id, data, isConnectable, onUpdateNodeData, onDeleteNode
           />
         </div>
       </div>
-      <Handle type="target" position={Position.Left} id="in" isConnectable={isConnectable} className="w- 8 h-8 rounded-full bg-rose-300 border-2 border-rose-700" />
+      <Handle type="target" position={Position.Left} id="in" isConnectable={isConnectable} className="w-18 h-18 rounded-full bg-rose-300 border-2 border-rose-700" />
       {/* No source handle, as 'err' typically terminates a function path */}
     </div>
   );

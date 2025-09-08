@@ -50,8 +50,8 @@ const ConstantNode = ({ id, data, isConnectable, onUpdateNodeData, onDeleteNode 
           />
         </div>
       </div>
-      <Handle type="target" position={Position.Left} id="in" isConnectable={isConnectable} className="w- 8 h-8 rounded-full bg-yellow-300 border-2 border-yellow-700" />
-      <Handle type="source" position={Position.Right} id="out" isConnectable={isConnectable} className="w- 8 h-8 rounded-full bg-yellow-300 border-2 border-yellow-700" />
+      <Handle type="target" position={Position.Left} id="in" isConnectable={isConnectable} className="w-18 h-18 rounded-full bg-yellow-300 border-2 border-yellow-700" />
+      <Handle type="source" position={Position.Right} id="out" isConnectable={isConnectable} className="w-18 h-18 rounded-full bg-yellow-300 border-2 border-yellow-700" />
     </div>
   );
 };

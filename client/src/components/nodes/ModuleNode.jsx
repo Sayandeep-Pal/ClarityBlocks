@@ -51,7 +51,7 @@ const ModuleNode = ({ id, data, isConnectable, onUpdateNodeData, onDeleteNode })
           />
         </div>
       </div>
-      <Handle type="source" position={Position.Right} id="out" isConnectable={isConnectable} className="w- 8 h-8 rounded-full bg-blue-300 border-2 border-blue-700" />
+      <Handle type="source" position={Position.Right} id="out" isConnectable={isConnectable} className="w-18 h-18 rounded-full bg-blue-300 border-2 border-blue-700" />
     </div>
   );
 };

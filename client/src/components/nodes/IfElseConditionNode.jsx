@@ -40,12 +40,12 @@ const IfElseConditionNode = ({ id, data, isConnectable, onUpdateNodeData, onDele
         </div>
       </div>
       {/* Input Handle */}
-      <Handle type="target" position={Position.Left} id="in" isConnectable={isConnectable} className="w- 8 h-8 rounded-full bg-teal-300 border-2 border-teal-700" />
+      <Handle type="target" position={Position.Left} id="in" isConnectable={isConnectable} className="w-18 h-18 rounded-full bg-teal-300 border-2 border-teal-700" />
       {/* Output Handles for 'then' and 'else' branches */}
-      <Handle type="source" position={Position.Bottom} id="then" isConnectable={isConnectable} style={{ left: '30%', transform: 'translateX(-50%)', background: '#84cc16' }} className="w- 8 h-8 rounded-full border-2 border-green-700" >
+      <Handle type="source" position={Position.Bottom} id="then" isConnectable={isConnectable} style={{ left: '30%', transform: 'translateX(-50%)', background: '#84cc16' }} className="w-18 h-18 rounded-full border-2 border-green-700" >
         <div className="absolute -bottom-6 text-xs text-lime-200 font-semibold">Then</div>
       </Handle>
-      <Handle type="source" position={Position.Bottom} id="else" isConnectable={isConnectable} style={{ left: '70%', transform: 'translateX(-50%)', background: '#ef4444' }} className="w- 8 h-8 rounded-full border-2 border-red-700" >
+      <Handle type="source" position={Position.Bottom} id="else" isConnectable={isConnectable} style={{ left: '70%', transform: 'translateX(-50%)', background: '#ef4444' }} className="w-18 h-18 rounded-full border-2 border-red-700" >
         <div className="absolute -bottom-6 text-xs text-rose-200 font-semibold">Else</div>
       </Handle>
     </div>

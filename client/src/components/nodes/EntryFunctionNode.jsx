@@ -47,13 +47,13 @@ const EntryFunctionNode = ({ data }) => {
         type="target"
         position={Position.Left}
         id="b"
-        className="w- 8 h-8 rounded-full bg-green-300 border-2 border-green-700"
+        className="w-18 h-18 rounded-full bg-green-300 border-2 border-green-700"
       />
       <Handle
         type="source"
         position={Position.Right}
         id="c"
-        className="w- 8 h-8 rounded-full bg-green-300 border-2 border-green-700"
+        className="w-18 h-18 rounded-full bg-green-300 border-2 border-green-700"
       />
     </div>
   );

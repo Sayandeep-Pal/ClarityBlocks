@@ -41,8 +41,8 @@ const BaseClarityNode = ({ data, IconComponent, title, bgColor, borderColor, tex
         {/* Add more generic fields or specific fields as needed */}
       </div>
 
-      {leftHandle && <Handle type="target" position={Position.Left} id="in" className="w- 8 h-8 rounded-full bg-gray-300 border-2 border-gray-700" />}
-      {rightHandle && <Handle type="source" position={Position.Right} id="out" className="w- 8 h-8 rounded-full bg-gray-300 border-2 border-gray-700" />}
+      {leftHandle && <Handle type="target" position={Position.Left} id="in" className="w-18 h-18 rounded-full bg-gray-300 border-2 border-gray-700" />}
+      {rightHandle && <Handle type="source" position={Position.Right} id="out" className="w-18 h-18 rounded-full bg-gray-300 border-2 border-gray-700" />}
     </div>
   );
 };

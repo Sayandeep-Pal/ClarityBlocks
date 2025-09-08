@@ -39,7 +39,7 @@ const ReturnOkNode = ({ id, data, isConnectable, onUpdateNodeData, onDeleteNode 
           />
         </div>
       </div>
-      <Handle type="target" position={Position.Left} id="in" isConnectable={isConnectable} className="w- 8 h-8 rounded-full bg-lime-300 border-2 border-lime-700" />
+      <Handle type="target" position={Position.Left} id="in" isConnectable={isConnectable} className="w-18 h-18 rounded-full bg-lime-300 border-2 border-lime-700" />
       {/* No source handle, as 'ok' typically terminates a function path */}
     </div>
   );

@@ -48,6 +48,15 @@ function App() {
 
   return (
     <Connect>
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-purple-300 text-lg font-light">Connecting to wallet...</p>
+          </div>
+        </div>
+      )}
       {isLanding ? (
         <div className="min-h-screen bg-[#0A0A0A] text-white">
           {/* Navigation - Sleeker and Minimal */}
@@ -59,13 +68,14 @@ function App() {
                 <span className="text-xl font-light tracking-wider">Clarity Block Builder</span>
               </div>
               <div className="flex items-center space-x-6">
-                <a href="https://github.com/your-repo" 
+                <a href='/tutorial' className="hover:text-purple-500 transition-colors duration-300">Tutorial</a>
+                <a href="https://github.com/Sayandeep-Pal" 
                    target="_blank" 
                    rel="noopener noreferrer" 
                    className="hover:text-purple-500 transition-colors duration-300">
                   <FaGithub className="text-xl" />
                 </a>
-                <a href="https://twitter.com/your-handle" 
+                <a href="https://twitter.com/ClarityBlocks" 
                    target="_blank" 
                    rel="noopener noreferrer" 
                    className="hover:text-purple-500 transition-colors duration-300">
