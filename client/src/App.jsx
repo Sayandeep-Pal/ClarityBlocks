@@ -68,7 +68,7 @@ function App() {
                 <span className="text-xl font-light tracking-wider">Clarity Block Builder</span>
               </div>
               <div className="flex items-center space-x-6">
-                <a href='/tutorial' className="hover:text-purple-500 transition-colors duration-300">Tutorial</a>
+                {/* <a href='/tutorial' className="hover:text-purple-500 transition-colors duration-300">Tutorial</a> */}
                 <a href="https://github.com/Sayandeep-Pal" 
                    target="_blank" 
                    rel="noopener noreferrer" 
